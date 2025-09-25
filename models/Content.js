@@ -1,26 +1,30 @@
 const mongoose = require("mongoose");
-const slugify = require("slugify");
 
-const TableRowSchema = new mongoose.Schema({}, { strict: false });
+const faqSchema = new mongoose.Schema({
+  question: { type: String, required: true },
+  answer: { type: String, required: true }
+});
 
-const ContentSchema = new mongoose.Schema(
+const contentSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
-    slug: { type: String, unique: true },
-    category: { type: String, required: true },   // ✅ NEW field
-    description: { type: String, required: true },
+    slug: { type: String, unique: true, required: true },
+    category: { type: String, required: true },
+
+    // ✅ SEO Fields
+    metaTitle: { type: String },
+    metaDescription: { type: String },
+    canonicalTag: { type: String },
+    metaKeywords: [{ type: String }],
+
+    // ✅ FAQ Schema (multiple Q&A)
+    faqSchema: [faqSchema],
+
+    description: { type: String }, // rich text editor content
     image: { type: String },
-    table: [TableRowSchema],
+    table: { type: Array }
   },
   { timestamps: true }
 );
 
-// Generate slug before saving
-ContentSchema.pre("save", function (next) {
-  if (this.title) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
-
-module.exports = mongoose.model("Content", ContentSchema);
+module.exports = mongoose.model("Content", contentSchema);
